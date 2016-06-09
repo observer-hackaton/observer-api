@@ -8,6 +8,7 @@ import (
 	"time"
 	"net/http"
 	"encoding/json"
+	"os"
 )
 
 type Monitor struct {
@@ -31,7 +32,7 @@ var pool *redis.Pool
 func main() {
 
 	pool = redis.NewPool(func() (redis.Conn, error) {
-		c, err := redis.Dial("tcp", "127.0.0.1:6379")
+		c, err := redis.Dial("tcp", os.Args[1] + ":6379")
 		if err != nil {
 			return nil, err
 		}
