@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"time"
 	"net/http"
+	"encoding/json"
 )
 
 type Monitor struct {
@@ -75,29 +76,26 @@ func getMonitorId(w rest.ResponseWriter, req *rest.Request) {
 
 func postMonitor(w rest.ResponseWriter, req *rest.Request) {
 	var monitor Monitor
-	err := req.DecodeJsonPayload(&monitor)
+	_ = req.DecodeJsonPayload(&monitor)
 	if monitor.ID == "" {
 		monitor.ID = RandomString(12)
 		client := pool.Get()
 		defer client.Close()
 
 		monitorStr, err := json.Marshal(monitor)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
 
-		client.Do("SET", "monitor-" + monitor.ID, monitorStr)
+		if err != nil {
+			w.WriteHeader(400)
+			w.WriteJson("invalid monitor payload")
+		} else {
+			client.Do("SET", "monitor-" + monitor.ID, monitorStr)
+			w.WriteJson("monitor created")
+		}
 	} else {
 		w.WriteHeader(400)
 		w.WriteJson("monitor ID should be empty when creating, use PATCH for modification")
 	}
-	if err != nil {
-		w.WriteHeader(400)
-		w.WriteJson("invalid monitor payload")
-	} else {
-		w.WriteJson("monitor created")
-	}
+
 }
 
 func deleteMonitorId(w rest.ResponseWriter, req *rest.Request) {

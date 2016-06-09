@@ -1,0 +1,1 @@
+{"monitor":{"check": {"type": "http","interval": 60,"arguments":"" },"notifier":{"type":"slack","arguments":"caca2"} }}
